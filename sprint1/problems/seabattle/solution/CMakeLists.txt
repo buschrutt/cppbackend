@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.11)
 
 # Проект называется Hello и написан на C++
 project(Seabattle CXX)
-# Исходый код будет компилироваться с поддержкой стандарта С++ 20
+# Исходный код будет компилироваться с поддержкой стандарта С++ 20
 set(CMAKE_CXX_STANDARD 20)
 
 # Подключаем сгенерированный скрипт conanbuildinfo.cmake, созданный Conan
