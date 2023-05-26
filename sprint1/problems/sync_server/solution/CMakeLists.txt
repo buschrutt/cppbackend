@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.11)
 project(Radio CXX)
 set(CMAKE_CXX_STANDARD 20)
 
-include(boost-build/conanbuildinfo.cmake)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+#${CMAKE_BINARY_DIR} or boost-build
 conan_basic_setup()
 
 find_package(Boost 1.78.0 REQUIRED)
