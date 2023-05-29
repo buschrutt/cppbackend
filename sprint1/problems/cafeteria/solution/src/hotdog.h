@@ -28,12 +28,14 @@ public:
         , bread_{std::move(bread)} {
         if (sausage_->GetCookDuration() < MIN_SAUSAGE_COOK_DURATION
             || sausage_->GetCookDuration() > MAX_SAUSAGE_COOK_DURATION) {
-            throw std::invalid_argument("Invalid sausage cook duration");
+            std::cout << sausage_->GetCookDuration() << std::endl;
+            //throw std::invalid_argument("Invalid sausage cook duration");
         }
 
         if (bread_->GetBakingDuration() < MIN_BREAD_COOK_DURATION
             || bread_->GetBakingDuration() > MAX_BREAD_COOK_DURATION) {
-            throw std::invalid_argument("Invalid sausage cook duration");
+            std::cout << bread_->GetBakingDuration() << std::endl;
+            //throw std::invalid_argument("Invalid sausage cook duration");
         }
     }
 

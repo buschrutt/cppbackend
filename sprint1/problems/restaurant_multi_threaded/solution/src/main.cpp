@@ -88,26 +88,6 @@ namespace {
         steady_clock::time_point start_time_{steady_clock::now()};
     };
 
-class ThreadChecker {
-public:
-    explicit ThreadChecker(std::atomic_int& counter)
-        : counter_{counter} {
-    }
-
-    ThreadChecker(const ThreadChecker&) = delete;
-    ThreadChecker& operator=(const ThreadChecker&) = delete;
-
-    ~ThreadChecker() {
-        // assert выстрелит, если между вызовом конструктора и деструктора
-        // значение expected_counter_ изменится
-        assert(expected_counter_ == counter_);
-    }
-
-private:
-    std::atomic_int& counter_;
-    int expected_counter_ = ++counter_;
-};
-
     // Функция, которая будет вызвана по окончании обработки заказа
     using OrderHandler = std::function<void(sys::error_code ec, int id, Hamburger* hamburger)>;
 
@@ -144,6 +124,15 @@ private:
                     }));
         }
 
+        void MarinadeOnion() {
+            logger_.LogMessage("Start marinading onion"sv);
+            marinade_timer_.async_wait(
+                    // OnOnionMarinaded будет вызван последовательным исполнителем strand_
+                    net::bind_executor(strand_, [self = shared_from_this()](sys::error_code ec) {
+                        self->OnOnionMarinaded(ec);
+                    }));
+        }
+
         void OnRoasted(sys::error_code ec) {
             if (ec) {
                 logger_.LogMessage("Roast error : "s + ec.what());
@@ -162,15 +151,6 @@ private:
                 onion_marinaded_ = true;
             }
             CheckReadiness(ec);
-        }
-
-        void MarinadeOnion() {
-            logger_.LogMessage("Start marinading onion"sv);
-            marinade_timer_.async_wait(
-                    // OnOnionMarinaded будет вызван последовательным исполнителем strand_
-                    net::bind_executor(strand_, [self = shared_from_this()](sys::error_code ec) {
-                        self->OnOnionMarinaded(ec);
-                    }));
         }
 
         void CheckReadiness(sys::error_code ec) {
