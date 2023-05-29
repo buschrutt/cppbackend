@@ -9,12 +9,12 @@ class Result {
 public:
     // Конструирует результат, хранящий копию value
     Result(const ValueType& value) noexcept(std::is_nothrow_copy_constructible_v<ValueType>)
-        : state_{value} {
+            : state_{value} {
     }
 
     // Конструирует результат, хранящий перемещённое из value значение
     Result(ValueType&& value) noexcept(std::is_nothrow_move_constructible_v<ValueType>)
-        : state_{std::move(value)} {
+            : state_{std::move(value)} {
     }
 
     // Явно запрещаем конструировать из nullptr
@@ -27,7 +27,7 @@ public:
      * Result<тип> result{std::make_exception_ptr(std::runtime_error{"some error"})};
      */
     Result(std::exception_ptr error)
-        : state_{error} {
+            : state_{error} {
         if (!error) {
             throw std::invalid_argument("Exception must not be null");
         }

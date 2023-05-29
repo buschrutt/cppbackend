@@ -67,7 +67,7 @@ namespace {
         const auto start_time = Clock::now();
 
         auto num_waiting_threads = std::min<int>(num_threads, num_orders);
-        // std::latch - объект синхронизации, который ведёт себя как счётчик обратного отсчёта
+        // std::latch - объект синхронизации, который ведёт себя как счётчик обратного отсчёта.
         // num_waiting_threads потоков будут ожидать, пока этот счётчик не обнулится
         std::latch start{num_waiting_threads};
 
@@ -142,11 +142,13 @@ int main() {
     auto hotdogs = PrepareHotDogs(num_orders, num_threads);
     const auto cook_duration = Clock::now() - start_time;
 
-    std::cout << "Cook duration: " << duration_cast<duration<double>>(cook_duration).count() << 's' << std::endl;
+    std::cout << "Cook duration: " << duration_cast<duration<double>>(cook_duration).count() << 's'
+              << std::endl;
 
     // Все заказы должны быть выполнены
-     assert(hotdogs.size() == num_orders);
+    assert(hotdogs.size() == num_orders);
     // Ожидаемое время приготовления 20 хот-догов на 4 рабочих потоках: от 7 до 7.5 секунд
+    //
     // При пошаговой отладке время работы программы может быть больше
     assert(cook_duration >= 7s && cook_duration <= 7.5s);
 

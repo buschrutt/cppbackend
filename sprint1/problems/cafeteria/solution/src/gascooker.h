@@ -13,8 +13,8 @@ namespace net = boost::asio;
 namespace sys = boost::system;
 
 /*
-Газовая плита - совместно используемый ресурс кафетерия
-содержит несколько горелок (burner), которые можно асинхронно занимать (метод UseBurner) и
+Газовая плита - совместно используемый ресурс кафетерия.
+Содержит несколько горелок (burner), которые можно асинхронно занимать (метод UseBurner) и
 освобождать (метод ReleaseBurner).
 Если свободных горелок нет, то запрос на занимание горелки ставится в очередь.
 Методы класса можно вызывать из разных потоков.
@@ -24,27 +24,26 @@ public:
     using Handler = std::function<void()>;
 
     GasCooker(net::io_context& io, int num_burners = 8)
-        : io_{io}
-        , number_of_burners_{num_burners} {
+            : io_{io}
+            , number_of_burners_{num_burners} {
     }
 
     GasCooker(const GasCooker&) = delete;
     GasCooker& operator=(const GasCooker&) = delete;
 
     ~GasCooker() {
-        //std::cout << "~gas_cooker" << std::endl;
         assert(burners_in_use_ == 0);
     }
 
-    // Используется для того, чтобы занять горелку. Объект handler будет вызван в момент, когда горелка
+    // Используется для того, чтобы занять горелку. handler будет вызван в момент, когда горелка
     // занята
     // Этот метод можно вызывать параллельно с вызовом других методов
     void UseBurner(Handler handler) {
         // Выполняем работу внутри strand, чтобы изменение состояния горелки выполнялось
         // последовательно
         net::dispatch(strand_,
-                      // За счёт захвата self в лямбда-функции, время жизни GasCooker будет продлено
-                      // до её вызова
+                // За счёт захвата self в лямбда-функции, время жизни GasCooker будет продлено
+                // до её вызова
                       [handler = std::move(handler), self = shared_from_this(), this]() mutable {
                           assert(strand_.running_in_this_thread());
                           assert(burners_in_use_ >= 0 && burners_in_use_ <= number_of_burners_);
@@ -57,7 +56,7 @@ public:
                               // Используется асинхронный вызов, так как handler может
                               // выполняться долго, а strand лучше освободить
                               net::post(io_, std::move(handler));
-                          } else {  // Все горелки заняты.
+                          } else {  // Все горелки заняты
                               // Ставим обработчик в хвост очереди
                               pending_handlers_.emplace_back(std::move(handler));
                           }
@@ -101,7 +100,7 @@ public:
     GasCookerLock() = default;
 
     explicit GasCookerLock(std::shared_ptr<GasCooker> cooker) noexcept
-        : cooker_{std::move(cooker)} {
+            : cooker_{std::move(cooker)} {
     }
 
     GasCookerLock(GasCookerLock&& other) = default;
@@ -113,7 +112,8 @@ public:
     ~GasCookerLock() {
         try {
             Unlock();
-        } catch (...) {}
+        } catch (...) {
+        }
     }
 
     void Unlock() {
