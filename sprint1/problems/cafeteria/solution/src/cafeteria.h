@@ -92,8 +92,6 @@ public:
             : io_{io} {
     }
 
-    // Asynchronously prepares a hot dog and invokes the handler when the hot dog is ready.
-    // This method can be called from any thread.
     void OrderHotDog(HotDogHandler handler) {
         int order_id;
         {
