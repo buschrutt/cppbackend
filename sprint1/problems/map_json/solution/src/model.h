@@ -50,19 +50,19 @@ public:
         , end_{start.x, end_y} {
     }
 
-    bool IsHorizontal() const noexcept {
+    [[nodiscard]] bool IsHorizontal() const noexcept {
         return start_.y == end_.y;
     }
 
-    bool IsVertical() const noexcept {
+    [[nodiscard]] bool IsVertical() const noexcept {
         return start_.x == end_.x;
     }
 
-    Point GetStart() const noexcept {
+    [[nodiscard]] Point GetStart() const noexcept {
         return start_;
     }
 
-    Point GetEnd() const noexcept {
+    [[nodiscard]] Point GetEnd() const noexcept {
         return end_;
     }
 
@@ -77,7 +77,7 @@ public:
         : bounds_{bounds} {
     }
 
-    const Rectangle& GetBounds() const noexcept {
+    [[nodiscard]] const Rectangle& GetBounds() const noexcept {
         return bounds_;
     }
 
@@ -95,15 +95,15 @@ public:
         , offset_{offset} {
     }
 
-    const Id& GetId() const noexcept {
+    [[nodiscard]] const Id& GetId() const noexcept {
         return id_;
     }
 
-    Point GetPosition() const noexcept {
+    [[nodiscard]] Point GetPosition() const noexcept {
         return position_;
     }
 
-    Offset GetOffset() const noexcept {
+    [[nodiscard]] Offset GetOffset() const noexcept {
         return offset_;
     }
 
@@ -125,23 +125,23 @@ public:
         , name_(std::move(name)) {
     }
 
-    const Id& GetId() const noexcept {
+    [[nodiscard]] const Id& GetId() const noexcept {
         return id_;
     }
 
-    const std::string& GetName() const noexcept {
+    [[nodiscard]] const std::string& GetName() const noexcept {
         return name_;
     }
 
-    const Buildings& GetBuildings() const noexcept {
+    [[nodiscard]] const Buildings& GetBuildings() const noexcept {
         return buildings_;
     }
 
-    const Roads& GetRoads() const noexcept {
+    [[nodiscard]] const Roads& GetRoads() const noexcept {
         return roads_;
     }
 
-    const Offices& GetOffices() const noexcept {
+    [[nodiscard]] const Offices& GetOffices() const noexcept {
         return offices_;
     }
 
@@ -173,11 +173,11 @@ public:
 
     void AddMap(Map map);
 
-    const Maps& GetMaps() const noexcept {
+    [[nodiscard]] const Maps& GetMaps() const noexcept {
         return maps_;
     }
 
-    const Map* FindMap(const Map::Id& id) const noexcept {
+    [[nodiscard]] const Map* FindMap(const Map::Id& id) const noexcept {
         if (auto it = map_id_to_index_.find(id); it != map_id_to_index_.end()) {
             return &maps_.at(it->second);
         }

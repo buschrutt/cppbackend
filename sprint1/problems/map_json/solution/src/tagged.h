@@ -28,8 +28,8 @@ namespace util {
 template <typename Value, typename Tag>
 class Tagged {
 public:
-    using ValueType = Value;
-    using TagType = Tag;
+    using ValueType [[maybe_unused]] = Value;
+    using TagType [[maybe_unused]] = Tag;
 
     explicit Tagged(Value&& v)
         : value_(std::move(v)) {
@@ -46,7 +46,7 @@ public:
         return value_;
     }
 
-    // Так в C++20 можно объявить оператор сравнения Tagged-типов
+    // Так в C++20 можно объявить оператор сравнения Tagged-типов.
     // Будет просто вызван соответствующий оператор для поля value_
     auto operator<=>(const Tagged<Value, Tag>&) const = default;
 
