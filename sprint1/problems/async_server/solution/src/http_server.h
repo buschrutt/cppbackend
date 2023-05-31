@@ -30,15 +30,7 @@ class SessionBase {
         using HttpRequest = http::request<http::string_body>;
 
         template <typename Body, typename Fields>
-        void Write(http::response<Body, Fields>&& response) {
-            // Запись выполняется асинхронно, поэтому response перемещаем в область кучи
-            auto safe_response = std::make_shared<http::response<Body, Fields>>(std::move(response));
-            auto self = GetSharedThis();
-            http::async_write(stream_, *safe_response,
-                              [safe_response, self](beast::error_code ec, std::size_t bytes_written) {
-                                  self->OnWrite(safe_response->need_eof(), ec, bytes_written);
-                              });
-        }
+        void Write(http::response<Body, Fields>&& response);
 
         explicit SessionBase(tcp::socket&& socket): stream_(std::move(socket)) {}
 
@@ -68,8 +60,7 @@ class SessionBase {
     class Session : public SessionBase, public std::enable_shared_from_this<Session<RequestHandler>> {
     public:
         template <typename Handler>
-        Session(tcp::socket&& socket, Handler&& request_handler): SessionBase(std::move(socket))
-                , request_handler_(std::forward<Handler>(request_handler)) {}
+        Session(tcp::socket&& socket, Handler&& request_handler): SessionBase(std::move(socket)), request_handler_(std::forward<Handler>(request_handler)) {}
 
     private:
         std::shared_ptr<SessionBase> GetSharedThis() override {
@@ -81,7 +72,7 @@ class SessionBase {
             // чтобы продлить время жизни сессии до вызова лямбды.
             // Используется generic-лямбда функция, способная принять response произвольного типа
             request_handler_(std::move(request), [self = this->shared_from_this()](auto&& response) {
-                self->Write(std::move(response));
+                self->Write(std::forward<decltype(response)>(response));
             });
         }
 
@@ -157,6 +148,18 @@ class SessionBase {
         // чтобы Listener хранил RequestHandler по значению
         using MyListener = Listener<std::decay_t<RequestHandler>>;
         std::make_shared<MyListener>(ioc, endpoint, std::forward<RequestHandler>(handler))->Run();
+    }
+
+    // %%%%%%%%%% %%%%%%%%%% TEMPLATES %%%%%%%%%% %%%%%%%%%%
+    template <typename Body, typename Fields>
+    void SessionBase::Write(http::response<Body, Fields>&& response) {
+        // Запись выполняется асинхронно, поэтому response перемещаем в область кучи
+        auto safe_response = std::make_shared<http::response<Body, Fields>>(std::move(response));
+        auto self = GetSharedThis();
+        http::async_write(stream_, *safe_response,
+                          [safe_response, self](beast::error_code ec, std::size_t bytes_written) {
+                              self->OnWrite(safe_response->need_eof(), ec, bytes_written);
+                          });
     }
 
 }  // namespace http_server

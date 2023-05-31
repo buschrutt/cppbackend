@@ -5,7 +5,7 @@
 
 namespace http_server
 {
-
+    // %%%%%%%%%% %%%%%%%%%% SessionBase %%%%%%%%%% %%%%%%%%%%
     void SessionBase::Run() {
         // Вызываем метод Read, используя executor объекта stream_.
         // Таким образом вся работа со stream_ будет выполняться, используя его executor
@@ -46,5 +46,7 @@ namespace http_server
         beast::error_code ec;
         stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
     }
+
+    // %%%%%%%%%% %%%%%%%%%% Session %%%%%%%%%% %%%%%%%%%%
 
 }  // namespace http_server
