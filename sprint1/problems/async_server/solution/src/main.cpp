@@ -81,8 +81,10 @@ int main() {
     // Подписываемся на сигналы и при их получении завершаем работу сервера
     net::signal_set signals(ioc, SIGINT, SIGTERM);
     signals.async_wait([&ioc](const sys::error_code& ec, [[maybe_unused]] int signal_number) {
-        if (!ec)
+        if (!ec) {
+            std::cout << "Signal "sv << signal_number << " received"sv << std::endl;
             ioc.stop();
+        }
     });
 
     const auto address = net::ip::make_address("0.0.0.0");
