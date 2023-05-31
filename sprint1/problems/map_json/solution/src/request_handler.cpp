@@ -2,16 +2,6 @@
 
 namespace http_handler {
 
-    http::response<http::string_body> RequestHandler::BuildResponse(std::string body_str) {
-        http::response<http::string_body> response;
-        response.result(http::status::ok);
-        response.set(http::field::server, "Buschrutt HTTP Server");
-        response.set(http::field::content_type, "application/json");
-        response.body() = std::move(body_str);
-        response.content_length(response.body().size());
-        return response;
-    }
-
     json::array RequestHandler::BuildAllMapsJson(const std::vector<model::Map>& maps) {
         json::array result;
         for (const auto& map : maps) {
@@ -69,4 +59,29 @@ namespace http_handler {
 
         return result;
     }
+
+    json::object RequestHandler::BuildNoMapErrorJson() {
+        json::object result;
+        result["code"] = "mapNotFound";
+        result["message"] = "Map not found";
+        return result;
+    }
+
+    json::object RequestHandler::BuildBadPathErrorJson() {
+        json::object result;
+        result["code"] = "badRequest";
+        result["message"] = "Bad request";
+        return result;
+    }
+
+    http::response<http::string_body> RequestHandler::BuildResponse(std::string body_str, http::status status) {
+        http::response<http::string_body> response;
+        response.result(status);
+        response.set(http::field::server, "Buschrutt HTTP Server");
+        response.set(http::field::content_type, "application/json");
+        response.body() = std::move(body_str);
+        response.content_length(response.body().size());
+        return response;
+    }
+
 }  // namespace http_handler
