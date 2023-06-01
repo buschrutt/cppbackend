@@ -12,7 +12,8 @@ RUN apt update && \
 COPY conanfile.txt /app/
 COPY conanbuildinfo.cmake /app/build
 
-RUN mkdir /app/build && cd /app/build && \
+#mkdir /app/build
+RUN cd /app/build && \
     conan profile detect && \
     conan install .. --build=missing
 
