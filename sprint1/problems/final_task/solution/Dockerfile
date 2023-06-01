@@ -10,7 +10,7 @@ RUN apt update && \
 
 # Запуск conan как раньше
 COPY conanfile.txt /app/
-COPY ./build/conanbuildinfo.cmake /app/build
+COPY conanbuildinfo.cmake /app/build
 
 RUN mkdir /app/build && cd /app/build && \
     conan profile detect && \
