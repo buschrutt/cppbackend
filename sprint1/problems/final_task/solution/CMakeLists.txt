@@ -4,7 +4,7 @@ set(CONAN_DISABLE_CHECK_COMPILER ON)  # Установка переменной 
 project(game_server CXX)
 set(CMAKE_CXX_STANDARD 20)
 
-include(build/conanbuildinfo.cmake)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 #${CMAKE_BINARY_DIR} or build
 conan_basic_setup()
 
