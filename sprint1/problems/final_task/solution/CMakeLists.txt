@@ -4,7 +4,8 @@ set(CONAN_DISABLE_CHECK_COMPILER ON)  # Установка переменной 
 project(game_server CXX)
 set(CMAKE_CXX_STANDARD 20)
 
-include(boost-build/conanbuildinfo.cmake)
+message(STATUS "CMAKE_BINARY_DIR: ${CMAKE_BINARY_DIR}")
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 #${CMAKE_BINARY_DIR} or boost-build
 conan_basic_setup()
 
