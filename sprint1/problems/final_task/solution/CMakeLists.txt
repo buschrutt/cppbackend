@@ -4,9 +4,9 @@ set(CONAN_DISABLE_CHECK_COMPILER ON)  # Установка переменной 
 project(game_server CXX)
 set(CMAKE_CXX_STANDARD 20)
 
-#include(boost-build/conanbuildinfo.cmake)
+include(boost-build/conanbuildinfo.cmake)
 #${CMAKE_BINARY_DIR} or boost-build
-#conan_basic_setup()
+conan_basic_setup()
 
 find_package(Boost 1.78.0 REQUIRED)
 if(Boost_FOUND)
