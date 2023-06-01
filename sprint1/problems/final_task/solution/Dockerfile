@@ -17,6 +17,7 @@ RUN mkdir /app/build && cd /app/build && \
 # Папка data больше не нужна
 COPY ./src /app/src
 COPY CMakeLists.txt /app/
+COPY . /app/build
 
 RUN cd /app/build && \
     cmake -DCMAKE_BUILD_TYPE=Release .. && \
