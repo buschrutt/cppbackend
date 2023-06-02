@@ -13,7 +13,6 @@ namespace http_server
     }
 
     void SessionBase::Read() {
-        using namespace std::literals;
         // Очищаем запрос от прежнего значения (метод Read может быть вызван несколько раз)
         request_ = {};
         stream_.expires_after(30s);
@@ -22,19 +21,16 @@ namespace http_server
     }
 
     void SessionBase::OnRead(beast::error_code ec, [[maybe_unused]] std::size_t bytes_read) {
-        using namespace std::literals;
         if (ec == http::error::end_of_stream) {
             // Нормальная ситуация - клиент закрыл соединение
             return Close();
         }
         if (ec) {return Close();}
-        //return ReportError(ec, "read"sv);
         HandleRequest(std::move(request_));
     }
 
     void SessionBase::OnWrite(bool close, beast::error_code ec, [[maybe_unused]] std::size_t bytes_written) {
         if (ec) {return Close();}
-        //return ReportError(ec, "write"sv);
         if (close)
             // Семантика ответа требует закрыть соединение
             return Close();
@@ -45,8 +41,8 @@ namespace http_server
     void SessionBase::Close() {
         beast::error_code ec;
         stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
+        if (ec)
+            std::cerr << "Error while socket shutdown: " << ec.message() << std::endl;
     }
-
-    // %%%%%%%%%% %%%%%%%%%% Session %%%%%%%%%% %%%%%%%%%%
 
 }  // namespace http_server

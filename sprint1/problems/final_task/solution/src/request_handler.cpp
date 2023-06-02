@@ -13,14 +13,10 @@ namespace http_handler {
         return result;
     }
 
-    json::object RequestHandler::BuildMapJson(const model::Map &map) {
-        json::object result;
-        result["id"] = map.GetId().operator*();
-        result["name"] = map.GetName();
-
-        // Construct the "roads" array
+    //// %%%%%%%%%% Start Of BuildMapJson funcs %%%%%%%%%%
+    json::array BuildRoadArray(const std::vector<model::Road> & roads) {
         json::array roadsArray;
-        for (const auto& road : map.GetRoads()) {
+        for (const auto& road : roads) {
             json::object roadObj;
             roadObj["x0"] = road.GetStart().x;
             roadObj["y0"] = road.GetStart().y;
@@ -30,11 +26,12 @@ namespace http_handler {
                 roadObj["y1"] = road.GetEnd().y;
             roadsArray.emplace_back(std::move(roadObj));
         }
-        result["roads"] = std::move(roadsArray);
+        return roadsArray;
+    }
 
-        // Construct the "buildings" array
+    json::array BuildBuildingArray(const std::vector<model::Building> & buildings) {
         json::array buildingsArray;
-        for (const auto& building : map.GetBuildings()) {
+        for (const auto& building : buildings) {
             json::object buildingObj;
             buildingObj["x"] = building.GetBounds().position.x;
             buildingObj["y"] = building.GetBounds().position.y;
@@ -42,11 +39,12 @@ namespace http_handler {
             buildingObj["h"] = building.GetBounds().size.height;
             buildingsArray.emplace_back(std::move(buildingObj));
         }
-        result["buildings"] = std::move(buildingsArray);
+        return buildingsArray;
+    }
 
-        // Construct the "offices" array
+    json::array BuildOfficeArray(const std::vector<model::Office> & offices) {
         json::array officesArray;
-        for (const auto& office : map.GetOffices()) {
+        for (const auto& office : offices) {
             json::object officeObj;
             officeObj["id"] = office.GetId().operator*();
             officeObj["x"] = office.GetPosition().x;
@@ -55,10 +53,19 @@ namespace http_handler {
             officeObj["offsetY"] = office.GetOffset().dy;
             officesArray.emplace_back(std::move(officeObj));
         }
-        result["offices"] = std::move(officesArray);
+        return officesArray;
+    }
 
+    json::object RequestHandler::BuildMapJson(const model::Map &map) {
+        json::object result;
+        result["id"] = map.GetId().operator*();
+        result["name"] = map.GetName();
+        result["roads"] = std::move(BuildRoadArray(map.GetRoads()));
+        result["buildings"] = std::move(BuildBuildingArray(map.GetBuildings()));
+        result["offices"] = std::move(BuildOfficeArray(map.GetOffices()));
         return result;
     }
+    //// %%%%%%%%%% End Of BuildMapJson funcs %%%%%%%%%%
 
     json::object RequestHandler::BuildNoMapErrorJson() {
         json::object result;

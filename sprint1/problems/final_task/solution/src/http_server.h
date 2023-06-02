@@ -15,6 +15,7 @@ namespace http_server {
     namespace http = beast::http;
     using namespace std::literals;
     namespace sys = boost::system;
+    using namespace std::literals;
 
     class SessionBase {
     public:
@@ -32,7 +33,7 @@ namespace http_server {
 
         explicit SessionBase(tcp::socket&& socket): stream_(std::move(socket)) {}
 
-        ~SessionBase() = default;
+        virtual ~SessionBase() = default;
 
     private:
         void Read();

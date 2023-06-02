@@ -1,4 +1,3 @@
-// final sprint 1
 #include "sdk.h"
 #include <boost/asio/io_context.hpp>
 #include <boost/json.hpp>
@@ -6,9 +5,7 @@
 #include <iostream>
 #include <mutex>
 #include <vector>
-#include <iostream>
 #include <thread>
-
 #include "json_loader.h"
 #include "request_handler.h"
 
@@ -20,7 +17,7 @@ namespace {
 
 // Запускает функцию fn на n потоках, включая текущий
 template <typename Fn>
-void RunWorkers(unsigned n, const Fn& fn) {
+void RunThreads(unsigned n, const Fn& fn) {
     n = std::max(1u, n);
     std::vector<std::jthread> workers;
     workers.reserve(n - 1);
@@ -72,7 +69,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char* argv[]) {
         std::cout << "Server has started..."sv << std::endl;
 
         // 6. Запускаем обработку асинхронных операций
-        RunWorkers(std::max(1u, num_threads), [&ioc] {
+        RunThreads(std::max(1u, num_threads), [&ioc] {
             ioc.run();
         });
     } catch (const std::exception& ex) {
