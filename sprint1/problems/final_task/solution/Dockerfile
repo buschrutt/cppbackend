@@ -6,18 +6,17 @@ RUN apt update && \
       python3-pip \
       cmake \
     && \
-    pip3 install conan
+    pip3 install conan==1.*
 
 # Запуск conan как раньше
 COPY conanfile.txt /app/
 RUN mkdir /app/build && cd /app/build && \
-    conan profile detect && \
+    #conan profile detect && \
     conan install .. --build=missing
 
 # Папка data больше не нужна
 COPY ./src /app/src
 COPY CMakeLists.txt /app/
-COPY . /app/build
 
 RUN cd /app/build && \
     cmake -DCMAKE_BUILD_TYPE=Release .. && \
@@ -31,9 +30,9 @@ RUN groupadd -r www && useradd -r -g www www
 USER www
 
 # Скопируем приложение со сборочного контейнера в директорию /app.
-# Не забываем также папку data, она пригодится.
+# Copying data folder.
 COPY --from=build /app/build/bin/game_server /app/
 COPY ./data /app/data
 
-# Запускаем игровой сервер
+# game server up
 ENTRYPOINT ["/app/game_server", "/app/data/config.json"]
