@@ -1,4 +1,4 @@
-# Не просто создаём образ, но даём ему имя build
+# create image build
 FROM gcc:11.3 as build
 
 RUN apt update && \
@@ -8,7 +8,7 @@ RUN apt update && \
     && \
     pip3 install conan==1.*
 
-# Запуск conan как раньше
+# conan install missing
 COPY conanfile.txt /app/
 RUN mkdir /app/build && cd /app/build && \
     #conan profile detect && \
