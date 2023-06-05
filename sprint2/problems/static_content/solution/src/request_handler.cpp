@@ -2,6 +2,36 @@
 
 namespace http_handler {
 
+    std::string RequestHandler::toLowerCase(const std::string& str) {
+        std::string result = str;
+        std::transform(result.begin(), result.end(), result.begin(), [](unsigned char c) {
+            return std::tolower(c);
+        });
+        return result;
+    }
+
+    std::string RequestHandler::urlDecode(const std::string& encodedStr) {
+        std::string decodedStr;
+        std::size_t length = encodedStr.length();
+        std::size_t i = 0;
+        while (i < length) {
+            if (encodedStr[i] == '%') {
+                if (i + 2 < length) {
+                    std::string hex = encodedStr.substr(i + 1, 2);
+                    int hexValue = std::stoi(hex, nullptr, 16);
+                    decodedStr += static_cast<char>(hexValue);
+                    i += 3;
+                } else
+                    decodedStr += encodedStr[i++];
+            } else if (encodedStr[i] == '+') {
+                decodedStr += ' ';
+                ++i;
+            } else
+                decodedStr += encodedStr[i++];
+        }
+        return decodedStr;
+    }
+
     json::array RequestHandler::BuildAllMapsJson(const std::vector<model::Map>& maps) {
         json::array result;
         for (const auto& map : maps) {
@@ -90,5 +120,18 @@ namespace http_handler {
         response.content_length(response.body().size());
         return response;
     }
+
+    http::response<http::string_body> RequestHandler::BuildSourceResponse(std::string body_str, http::status status, std::string type) {
+
+
+        http::response<http::string_body> response;
+        response.result(status);
+        response.set(http::field::server, "Buschrutt HTTP Server");
+        response.set(http::field::content_type, type);
+        response.body() = std::move(body_str);
+        response.content_length(response.body().size());
+        return response;
+    }
+
 
 }  // namespace http_handler

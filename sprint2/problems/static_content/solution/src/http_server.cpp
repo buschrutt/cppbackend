@@ -41,8 +41,6 @@ namespace http_server
     void SessionBase::Close() {
         beast::error_code ec;
         stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
-        if (ec)
-            std::cerr << "Error while socket shutdown: " << ec.message() << std::endl;
     }
 
 }  // namespace http_server

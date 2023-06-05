@@ -32,15 +32,16 @@ void RunThreads(unsigned n, const Fn& fn) {
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] const char* argv[]) {
 
-    if (argc != 2) {
+    /*if (argc < 2) {
         std::cerr << "Usage: game_server <game-config-json>"sv << std::endl;
         return EXIT_FAILURE;
-    }
+    }*/
 
-    /*std::string argv_1 = "config.json";*/
+    std::string argv_1 = "config.json";
+    std::string argv_2 = "static";
     try {
         // 1. Загружаем карту из файла и построить модель игры
-        model::Game game = json_loader::LoadGame(/*argv_1*/argv[1]);
+        model::Game game = json_loader::LoadGame(argv_1/*argv[1]*/);
 
         // 2. Инициализируем io_context
         const unsigned num_threads = std::thread::hardware_concurrency();
