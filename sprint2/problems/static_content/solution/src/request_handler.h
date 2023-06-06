@@ -51,8 +51,7 @@ namespace http_handler {
         static http::response<http::string_body> BuildHeadResponse(int length, http::status code_str, const std::string& type);
 
         template <typename Body, typename Allocator, typename Send>
-        void operator()(http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send) {
-
+        void operator()(http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send, const std::string& content_adr) {
             if (req.method() == http::verb::get) {
                 std::vector<std::string> _tp;
                 boost::split(_tp, req.target(), boost::is_any_of("/"));
@@ -76,8 +75,8 @@ namespace http_handler {
                     if (_tp[_tp.size() - 1].empty()) str_request = str_request + "index.html";
                     std::string source_type = (!str_request.empty() && str_request.find_last_of('.') != std::string::npos)?
                             toLowerCase(str_request.substr(str_request.find_last_of('.') + 1)): "";
-                    std::string resource_path = "static/" + str_request;
-                    if (!IsSubPath(resource_path, "static/")) {
+                    std::string resource_path = content_adr + str_request;
+                    if (!IsSubPath(resource_path, content_adr)) {
                         json::object result = BuildBadPathErrorJson();
                         send(std::move(BuildResponse(json::serialize(result), http::status::bad_request)));
                         return;
@@ -102,8 +101,8 @@ namespace http_handler {
                     if (_tp[_tp.size() - 1].empty()) str_request = str_request + "index.html";
                     std::string source_type = (!str_request.empty() && str_request.find_last_of('.') != std::string::npos)?
                                               toLowerCase(str_request.substr(str_request.find_last_of('.') + 1)): "";
-                    std::string resource_path = "static/" + str_request;
-                    if (!IsSubPath(resource_path, "static/")) {
+                    std::string resource_path = content_adr + str_request;
+                    if (!IsSubPath(resource_path, content_adr)) {
                         json::object result = BuildBadPathErrorJson();
                         send(std::move(BuildResponse(json::serialize(result), http::status::bad_request)));
                         return;
