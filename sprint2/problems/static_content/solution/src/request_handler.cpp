@@ -123,11 +123,14 @@ namespace http_handler {
         return result;
     }
 
-    json::object RequestHandler::BuildNotFoundError() {
-        json::object result;
-        result["code"] = "Not Found";
-        result["message"] = "Source Not found";
-        return result;
+    http::response<http::string_body> RequestHandler::BuildNotFoundError() {
+        http::response<http::string_body> response;
+        response.result(http::status::not_found);
+        response.set(http::field::server, "Buschrutt HTTP Server");
+        response.set(http::field::content_type, "text/plain");
+        response.body() = "Source Not found";
+        response.prepare_payload();
+        return response;
     }
 
     http::response<http::string_body> RequestHandler::BuildResponse(std::string body_str, http::status status) {

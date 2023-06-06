@@ -42,7 +42,7 @@ namespace http_handler {
 
         static json::object BuildBadPathErrorJson();
 
-        static json::object BuildNotFoundError();
+        static http::response<http::string_body> BuildNotFoundError();
 
         static http::response<http::string_body> BuildResponse(std::string body_str, http::status code_str);
 
@@ -85,8 +85,7 @@ namespace http_handler {
                     std::string type = (contentTypeMap_.contains(source_type))?
                             contentTypeMap_.at(source_type): "application/octet-stream";
                     if (boost::system::error_code ec; file.open(resource_path.c_str(), beast::file_mode::read, ec), ec) {
-                        json::object result = BuildNotFoundError();
-                        send(std::move(BuildResponse(json::serialize(result), http::status::not_found)));
+                        send(std::move(BuildNotFoundError()));
                         return;
                     }
                     http::response<http::file_body> response = BuildFileResponse(std::move(file), http::status::ok, type);
@@ -111,8 +110,7 @@ namespace http_handler {
                     std::string type = (contentTypeMap_.contains(source_type))?
                                        contentTypeMap_.at(source_type): "application/octet-stream";
                     if (boost::system::error_code ec; file.open(resource_path.c_str(), beast::file_mode::read, ec), ec) {
-                        json::object result = BuildNotFoundError();
-                        send(std::move(BuildResponse(json::serialize(result), http::status::not_found)));
+                        send(std::move(BuildNotFoundError()));
                         return;
                     }
                     http::response<http::string_body> response = BuildHeadResponse(int(file.size()), http::status::ok, type);
