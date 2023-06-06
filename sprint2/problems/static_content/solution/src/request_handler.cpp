@@ -1,4 +1,6 @@
 #include "request_handler.h"
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
 
 namespace http_handler {
 
@@ -30,6 +32,16 @@ namespace http_handler {
                 decodedStr += encodedStr[i++];
         }
         return decodedStr;
+    }
+
+    bool RequestHandler::IsSubPath(fs::path path, fs::path base) {
+        path = fs::weakly_canonical(path);
+        base = fs::weakly_canonical(base);
+        for (auto b = base.begin(), p = path.begin(); b != base.end(); ++b, ++p) {
+            if (p == path.end() || *p != *b)
+                return false;
+        }
+        return true;
     }
 
     json::array RequestHandler::BuildAllMapsJson(const std::vector<model::Map>& maps) {
@@ -111,6 +123,13 @@ namespace http_handler {
         return result;
     }
 
+    json::object RequestHandler::BuildNotFoundError() {
+        json::object result;
+        result["code"] = "Not Found";
+        result["message"] = "Source Not found";
+        return result;
+    }
+
     http::response<http::string_body> RequestHandler::BuildResponse(std::string body_str, http::status status) {
         http::response<http::string_body> response;
         response.result(status);
@@ -121,17 +140,25 @@ namespace http_handler {
         return response;
     }
 
-    http::response<http::string_body> RequestHandler::BuildSourceResponse(std::string body_str, http::status status, std::string type) {
-
-
-        http::response<http::string_body> response;
-        response.result(status);
+    http::response<http::file_body> RequestHandler::BuildFileResponse(http::file_body::value_type file, http::status code_str, const std::string&  type) {
+        http::response<http::file_body> response;
+        response.result(code_str);
         response.set(http::field::server, "Buschrutt HTTP Server");
         response.set(http::field::content_type, type);
-        response.body() = std::move(body_str);
-        response.content_length(response.body().size());
+        response.set(http::field::transfer_encoding, "chunked");
+        response.body() = std::move(file);
+        response.prepare_payload();
         return response;
     }
 
+    http::response<http::string_body> RequestHandler::BuildHeadResponse(int length, http::status code_str, const std::string& type) {
+        http::response<http::string_body> response;
+        response.result(code_str);
+        response.set(http::field::server, "Buschrutt HTTP Server");
+        response.set(http::field::content_type, type);
+        response.body() = "";
+        response.content_length(length);
+        return response;
+    }
 
 }  // namespace http_handler

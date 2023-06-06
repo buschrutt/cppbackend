@@ -37,7 +37,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char* argv[]) {
         return EXIT_FAILURE;
     }*/
 
-    std::string argv_1 = "config.json";
+    std::string argv_1 = "data/config.json";
     std::string argv_2 = "static";
     try {
         // 1. Загружаем карту из файла и построить модель игры

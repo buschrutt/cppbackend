@@ -48,7 +48,7 @@ namespace json_loader {
 
     //// LOAD GAME ENTRY
     model::Game LoadGame(const std::filesystem::path & json_path) {
-        std::filesystem::path relative_json_path = "data/" + json_path.string();
+        std::filesystem::path relative_json_path = json_path.string();
         std::string json_str;
         std::ifstream json_i_stream(relative_json_path);
         if (json_i_stream.is_open()){

@@ -3,11 +3,14 @@
 #include "model.h"
 #include <boost/json.hpp>
 #include <boost/algorithm/string.hpp>
+#include <filesystem>
+#include <boost/beast/http.hpp>
 
 namespace http_handler {
     namespace beast = boost::beast;
     namespace http = beast::http;
     namespace json = boost::json;
+    namespace fs = std::filesystem;
 
     class RequestHandler {
     public:
@@ -29,6 +32,8 @@ namespace http_handler {
 
         static std::string urlDecode(const std::string& encodedStr);
 
+        static bool IsSubPath(fs::path path, fs::path base);
+
         static json::array BuildAllMapsJson(const std::vector<model::Map>& maps);
 
         static json::object BuildMapJson(const model::Map& map);
@@ -37,11 +42,13 @@ namespace http_handler {
 
         static json::object BuildBadPathErrorJson();
 
-        static http::response<http::string_body> BuildResponse(std::string body_str, http::status status);
+        static json::object BuildNotFoundError();
 
-        static http::response<http::string_body> BuildSourceResponse(std::string body_str,
-                                                                     http::status status,
-                                                                     std::string type);
+        static http::response<http::string_body> BuildResponse(std::string body_str, http::status code_str);
+
+        static http::response<http::file_body> BuildFileResponse(http::file_body::value_type file, http::status code_str, const std::string&  type);
+
+        static http::response<http::string_body> BuildHeadResponse(int length, http::status code_str, const std::string& type);
 
         template <typename Body, typename Allocator, typename Send>
         void operator()(http::request<Body, http::basic_fields<Allocator>>&& req, Send&& send) {
@@ -49,7 +56,6 @@ namespace http_handler {
             if (req.method() == http::verb::get) {
                 std::vector<std::string> _tp;
                 boost::split(_tp, req.target(), boost::is_any_of("/"));
-
                 if (_tp.size() == 4 && _tp[1] == "api" && _tp[2] == "v1" && _tp[3] == "maps") {
                     json::array result = BuildAllMapsJson(game_.GetMaps());
                     send(std::move(BuildResponse(json::serialize(result), http::status::ok)));
@@ -65,33 +71,52 @@ namespace http_handler {
                     json::object result = BuildBadPathErrorJson();
                     send(std::move(BuildResponse(json::serialize(result), http::status::bad_request)));
                 } else {
+                    //// GET source if-else case:
                     std::string str_request = urlDecode(req.target().to_string());
-                    std::string source_name = urlDecode(_tp[_tp.size() - 1]);
-                    std::size_t lastDotIndex = source_name.find_last_of('.');
-                    std::string source_type;
-                    if (lastDotIndex != std::string::npos) {
-                        source_type = toLowerCase(source_name.substr(lastDotIndex + 1));
-                    } else {
-                        source_type = "";
-                    }
+                    if (_tp[_tp.size() - 1].empty()) str_request = str_request + "index.html";
+                    std::string source_type = (!str_request.empty() && str_request.find_last_of('.') != std::string::npos)?
+                            toLowerCase(str_request.substr(str_request.find_last_of('.') + 1)): "";
                     std::string resource_path = "static/" + str_request;
-                    http::file_body::value_type file;
-
-                    if (boost::system::error_code ec; file.open(resource_path.c_str(), beast::file_mode::read, ec), ec) {
-                        throw std::runtime_error{"--Failed to open file --" + resource_path};
+                    if (!IsSubPath(resource_path, "static/")) {
+                        json::object result = BuildBadPathErrorJson();
+                        send(std::move(BuildResponse(json::serialize(result), http::status::bad_request)));
+                        return;
                     }
-                    std::string type;
-                    if (contentTypeMap_.contains(source_type))
-                        type = contentTypeMap_.at(source_type);
-                    else
-                        type = "application/octet-stream";
-                    http::response<http::file_body> response;
-                    response.result(http::status::ok);
-                    response.set(http::field::server, "Buschrutt HTTP Server");
-                    response.set(http::field::content_type, type);
-                    response.set(http::field::transfer_encoding, "chunked");
-                    response.body() = std::move(file);
-                    response.prepare_payload();
+                    http::file_body::value_type file;
+                    std::string type = (contentTypeMap_.contains(source_type))?
+                            contentTypeMap_.at(source_type): "application/octet-stream";
+                    if (boost::system::error_code ec; file.open(resource_path.c_str(), beast::file_mode::read, ec), ec) {
+                        json::object result = BuildNotFoundError();
+                        send(std::move(BuildResponse(json::serialize(result), http::status::not_found)));
+                        return;
+                    }
+                    http::response<http::file_body> response = BuildFileResponse(std::move(file), http::status::ok, type);
+                    send(std::move(response));
+                }
+            } else if (req.method() == http::verb::head) {
+                std::vector<std::string> _tp;
+                boost::split(_tp, req.target(), boost::is_any_of("/"));
+                if (!_tp.empty() && _tp[1] != "api") {
+                    //// HEAD source if-else case:
+                    std::string str_request = urlDecode(req.target().to_string());
+                    if (_tp[_tp.size() - 1].empty()) str_request = str_request + "index.html";
+                    std::string source_type = (!str_request.empty() && str_request.find_last_of('.') != std::string::npos)?
+                                              toLowerCase(str_request.substr(str_request.find_last_of('.') + 1)): "";
+                    std::string resource_path = "static/" + str_request;
+                    if (!IsSubPath(resource_path, "static/")) {
+                        json::object result = BuildBadPathErrorJson();
+                        send(std::move(BuildResponse(json::serialize(result), http::status::bad_request)));
+                        return;
+                    }
+                    http::file_body::value_type file;
+                    std::string type = (contentTypeMap_.contains(source_type))?
+                                       contentTypeMap_.at(source_type): "application/octet-stream";
+                    if (boost::system::error_code ec; file.open(resource_path.c_str(), beast::file_mode::read, ec), ec) {
+                        json::object result = BuildNotFoundError();
+                        send(std::move(BuildResponse(json::serialize(result), http::status::not_found)));
+                        return;
+                    }
+                    http::response<http::string_body> response = BuildHeadResponse(int(file.size()), http::status::ok, type);
                     send(std::move(response));
                 }
             }
