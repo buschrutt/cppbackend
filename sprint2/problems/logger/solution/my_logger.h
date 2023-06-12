@@ -21,10 +21,12 @@ class Logger {
             return *manual_ts_;
         return std::chrono::system_clock::now();
     }
-    [[nodiscard]] std::_Timeobj<char,const tm *> GetTimeStamp() const {
+    [[nodiscard]] std::string GetTimeStamp() const {
         const auto now = GetTime();
         const auto t_c = std::chrono::system_clock::to_time_t(now);
-        return std::put_time(std::localtime(&t_c), "%F %T");
+        std::ostringstream oss;
+        oss << std::put_time(std::localtime(&t_c), "%F %T");
+        return oss.str();
     }
 
     [[nodiscard]] std::string GetFileTimeStamp() const {
