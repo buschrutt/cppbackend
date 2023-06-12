@@ -22,19 +22,16 @@ class Logger {
         return std::chrono::system_clock::now();
     }
     [[nodiscard]] std::string GetTimeStamp() const {
-        const auto now = GetTime();
-        const auto t_c = std::chrono::system_clock::to_time_t(now);
-        std::ostringstream oss;
-        oss << std::put_time(std::localtime(&t_c), "%F %T");
-        return oss.str();
+        const auto t_c = std::chrono::system_clock::to_time_t(GetTime());
+        std::ostringstream ss;
+        ss << std::put_time(std::localtime(&t_c), "%F %T");
+        return ss.str();
     }
 
     [[nodiscard]] std::string GetFileTimeStamp() const {
         const auto t_c = std::chrono::system_clock::to_time_t(GetTime());
-        std::tm local_time{};
-        localtime_s(&local_time, &t_c);
-        std::stringstream ss;
-        ss << std::put_time(&local_time, "%Y_%m_%d");
+        std::ostringstream ss;
+        ss << std::put_time(std::localtime(&t_c), "%Y_%m_%d");
         return ss.str();
     }
 
