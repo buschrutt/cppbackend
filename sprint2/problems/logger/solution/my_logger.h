@@ -73,6 +73,5 @@ public:
 
 private:
     std::optional<std::chrono::system_clock::time_point> manual_ts_;
-    std::ofstream log_file_{"sample.log"s};
     std::mutex m_;
 };
