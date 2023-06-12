@@ -60,7 +60,7 @@ public:
     template<class... Ts>
     void Log(const Ts&... args) {
         std::lock_guard<std::mutex> lock(m_);
-        std::ofstream log_file("/var/log/" + GetFileTimeStamp(), std::ios_base::app); // "/var/log/"
+        std::ofstream log_file("/var/log/sample_log_" + GetFileTimeStamp(), std::ios_base::app); // "/var/log/sample_log_"
         log_file << GetTimeStamp() << ": ";
         PrintArgsToFile(log_file, args...);
         log_file << std::endl;
