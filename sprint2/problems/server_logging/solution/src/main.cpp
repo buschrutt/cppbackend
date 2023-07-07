@@ -77,17 +77,18 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char* argv[]) {
     logging::add_common_attributes();
     logging::add_console_log(std::cout, keywords::format = &MyFormatter, keywords::auto_flush = true);
 
-/*
     if (argc < 2) {
         std::cerr << "Usage: game_server <game-config-json>"sv << std::endl;
         return EXIT_FAILURE;
     }
-*/
+
+    /*
     std::string argv_1 = "data/config.json";
     std::string argv_2 = "static";
+     */
     try {
         // 1. Загружаем карту из файла и построить модель игры
-        model::Game game = json_loader::LoadGame(argv_1);
+        model::Game game = json_loader::LoadGame(/*argv_1*/argv[1]);
 
         // 2. Инициализируем io_context
         const unsigned num_threads = std::thread::hardware_concurrency();
@@ -109,16 +110,13 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] const char* argv[]) {
         // 5. Запустить обработчик HTTP-запросов, делегируя их обработчику запросов
         const auto address = net::ip::make_address("0.0.0.0");
         constexpr net::ip::port_type port = 8080;
-        http_server::ServerHttp(ioc, {address, port}, [&handler, arg2 = argv_2](auto&& req, auto&& send) {
+        http_server::ServerHttp(ioc, {address, port}, [&handler, arg2 = argv[2]/*argv_2*/](auto&& req, auto&& send) {
             handler(std::forward<decltype(req)>(req), std::forward<decltype(send)>(send), arg2);
         });
 
         // Server started massage
         json::value custom_data{{"port", port}, {"address", address.to_string()}};
         BOOST_LOG_TRIVIAL(info) << logging::add_value(additional_data, custom_data) << "server started"sv;
-
-        json::value custom_data2{{"port", port}, {"address", address.to_string()}};
-        BOOST_LOG_TRIVIAL(info) << logging::add_value(additional_data, custom_data2) << "server started"sv;
 
         // 6. Запускаем обработку асинхронных операций
         RunThreads(std::max(1u, num_threads), [&ioc] {
