@@ -9,7 +9,7 @@ set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 
 # обратите внимание на аргумент TARGETS у команды conan_basic_setup
-include(build/conanbuildinfo.cmake)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
 find_package(Boost 1.78.0 REQUIRED COMPONENTS log)
