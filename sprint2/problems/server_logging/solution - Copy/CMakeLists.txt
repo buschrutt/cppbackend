@@ -4,15 +4,13 @@ set(CONAN_DISABLE_CHECK_COMPILER ON)  # Установка переменной 
 project(game_server CXX)
 set(CMAKE_CXX_STANDARD 20)
 
-set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
 
-# обратите внимание на аргумент TARGETS у команды conan_basic_setup
+#include(${CMAKE_BINARY_DIR}/conanbuildinfo[ conanbuildinfo_multi].cmake)
+#${CMAKE_BINARY_DIR} or build
 include(build/conanbuildinfo.cmake)
 conan_basic_setup(TARGETS)
 
-find_package(Boost 1.78.0 REQUIRED COMPONENTS log)
+find_package(Boost 1.78.0 REQUIRED)
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
 endif()
